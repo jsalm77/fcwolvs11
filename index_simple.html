@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>FC Wolves - فريق الذئاب</title>
+    
+    <link rel="icon" type="image/png" href="images/fc_wolves_icon.png">
+    <link rel="apple-touch-icon" href="images/fc_wolves_icon.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Arabic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getMessaging } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzBbcMUHBs_pc1mbfwobGW7KJgyDKmQIE",
+            authDomain: "mj36-7e65e.firebaseapp.com",
+            databaseURL: "https://mj36-7e65e-default-rtdb.firebaseio.com",
+            projectId: "mj36-7e65e",
+            storageBucket: "mj36-7e65e.firebasestorage.app",
+            messagingSenderId: "64103654826",
+            appId: "1:64103654826:web:c7dcd0e9af6466e67137d3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.database = getDatabase(app);
+        window.storage = getStorage(app);
+        
+        try {
+            window.messaging = getMessaging(app);
+        } catch (error) {
+            console.log('Messaging not supported in this environment');
+        }
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p>جاري تحميل فريق الذئاب...</p>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="header hidden" id="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="images/fc_wolves_icon.png" alt="FC Wolves" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <span>FC WOLVES</span>
+            </div>
+            <div class="nav-icons">
+                <button class="nav-icon" id="homeBtn" onclick="showSection('playerDashboard')" title="الرئيسية">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="postsBtn" onclick="showSection('postsSection')" title="المنشورات">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="chatBtn" onclick="showSection('chatSection')" title="الدردشة">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                    <span class="notification-badge hidden" id="chatBadge">0</span>
+                </button>
+                <button class="nav-icon" id="profileBtn" onclick="showSection('profileSection')" title="الملف الشخصي">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="logoutBtn" onclick="logout()" title="تسجيل الخروج">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Login Section -->
+        <section class="section login-section active" id="loginSection">
+            <div class="login-card">
+                <div class="team-logo">
+                    <img src="images/fc_wolves_logo.png" alt="FC Wolves" style="width: 120px; height: 120px; object-fit: contain;">
+                </div>
+                <h1 class="team-name">FC WOLVES</h1>
+                <h2 class="team-subtitle">فريق الذئاب</h2>
+                <p class="team-slogan">الكوشه وطن و الوطن لا يُخان 😂💪</p>
+                
+                <div class="input-group">
+                    <input type="text" class="input-field" id="accessCode" placeholder="أدخل رمز الدخول">
+                </div>
+                
+                <button class="btn btn-primary" onclick="checkAccessCode()">دخول</button>
+                <div class="error-message" id="loginError"></div>
+            </div>
+        </section>
+
+        <!-- Registration Section -->
+        <section class="section registration-section" id="registrationSection">
+            <div class="registration-card">
+                <div class="team-logo">
+                    <img src="images/fc_wolves_logo.png" alt="FC Wolves" style="width: 120px; height: 120px; object-fit: contain;">
+                </div>
+                <h1 class="team-name">إنشاء حساب جديد</h1>
+                <h2 class="team-subtitle">انضم إلى فريق الذئاب</h2>
+                
+                <div class="input-group">
+                    <input type="text" class="input-field" id="newPlayerName" placeholder="الاسم الكامل">
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" class="input-field" id="newPlayerPassword" placeholder="كلمة المرور">
+                </div>
+                
+                <div class="input-group">
+                    <select class="input-field" id="newPlayerPosition">
+                        <option value="">اختر المركز</option>
+                        <option value="حارس مرمى">حارس مرمى</option>
+                        <option value="مدافع">مدافع</option>
+                        <option value="وسط">وسط</option>
+                        <option value="مهاجم">مهاجم</option>
+                        <option value="جناح">جناح</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <input type="number" class="input-field" id="newPlayerNumber" placeholder="رقم القميص (1-99)">
+                </div>
+                
+                <button class="btn btn-primary" onclick="registerPlayer()">إنشاء الحساب</button>
+                <button class="btn btn-secondary" onclick="showSection('loginSection')">العودة لتسجيل الدخول</button>
+                <div class="error-message" id="registrationError"></div>
+            </div>
+        </section>
+
+        <!-- Player Dashboard -->
+        <section class="section player-dashboard" id="playerDashboard">
+            <div class="welcome-card">
+                <h2>مرحباً بك في فريق الذئاب</h2>
+                <p id="playerWelcome">أهلاً وسهلاً</p>
+            </div>
+
+            <!-- Team Status -->
+            <div class="status-card">
+                <h3>حالة الفريق</h3>
+                <div class="status-indicator" id="teamStatus">
+                    <span class="status-text">تدريب</span>
+                </div>
+            </div>
+
+            <!-- Next Match -->
+            <div class="match-info" id="nextMatchInfo">
+                <h3>المباراة القادمة</h3>
+                <div class="match-details">
+                    <p id="matchDate">لا توجد مباراة قادمة</p>
+                    <p id="matchTime"></p>
+                    <p id="matchLocation"></p>
+                </div>
+                <div class="countdown" id="countdown">
+                    <div class="countdown-item">
+                        <span id="days">0</span>
+                        <label>أيام</label>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="hours">0</span>
+                        <label>ساعات</label>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="minutes">0</span>
+                        <label>دقائق</label>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="seconds">0</span>
+                        <label>ثواني</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formation -->
+            <div class="formation-card">
+                <h3>التشكيلة الحالية</h3>
+                <div class="formation-display" id="formationDisplay">
+                    <img src="images/formation_2_1_2.png" alt="Formation" class="formation-image">
+                </div>
+                <div class="formation-info">
+                    <p>التشكيلة: <span id="currentFormation">2-1-2</span></p>
+                </div>
+            </div>
+
+            <!-- Players List -->
+            <div class="players-section">
+                <h3>قائمة اللاعبين</h3>
+                <div class="players-grid" id="playersGrid">
+                    <!-- Players will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Previous Results -->
+            <div class="results-section">
+                <h3>النتائج السابقة</h3>
+                <div class="results-list" id="resultsList">
+                    <!-- Results will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Posts Section -->
+        <section class="section posts-section" id="postsSection">
+            <div class="posts-header">
+                <h2>منشورات الفريق</h2>
+            </div>
+            <div class="posts-container" id="postsContainer">
+                <!-- Posts will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section class="section chat-section" id="chatSection">
+            <div class="chat-header">
+                <h2>دردشة الفريق</h2>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="اكتب رسالتك...">
+                    <button class="send-btn" onclick="sendMessage()">إرسال</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section class="section profile-section" id="profileSection">
+            <div class="profile-header">
+                <h2>الملف الشخصي</h2>
+            </div>
+            <div class="profile-card">
+                <div class="profile-image" id="profileImage">
+                    <img src="https://via.placeholder.com/150" alt="صورة اللاعب" id="playerImage">
+                </div>
+                <div class="profile-info">
+                    <h3 id="profileName">اسم اللاعب</h3>
+                    <p id="profilePosition">المركز</p>
+                    <p id="profileNumber">رقم القميص</p>
+                </div>
+                <button class="btn btn-primary" onclick="editProfile()">تعديل الملف الشخصي</button>
+            </div>
+        </section>
+
+        <!-- Coach Dashboard -->
+        <section class="section coach-dashboard" id="coachDashboard">
+            <div class="coach-header">
+                <h2>لوحة تحكم المدرب</h2>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="action-btn" onclick="showAddPlayerForm()">إضافة لاعب</button>
+                <button class="action-btn" onclick="showMatchForm()">إضافة مباراة</button>
+                <button class="action-btn" onclick="showPostForm()">إضافة منشور</button>
+                <button class="action-btn" onclick="sendNotification()">إرسال إشعار</button>
+            </div>
+
+            <!-- Add Player Form -->
+            <div class="form-card hidden" id="addPlayerForm">
+                <h3>إضافة لاعب جديد</h3>
+                <div class="input-group">
+                    <input type="text" class="input-field" id="playerName" placeholder="اسم اللاعب">
+                </div>
+                <div class="input-group">
+                    <select class="input-field" id="playerPosition">
+                        <option value="">اختر المركز</option>
+                        <option value="حارس مرمى">حارس مرمى</option>
+                        <option value="مدافع">مدافع</option>
+                        <option value="وسط">وسط</option>
+                        <option value="مهاجم">مهاجم</option>
+                        <option value="جناح">جناح</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="number" class="input-field" id="playerNumber" placeholder="رقم القميص">
+                </div>
+                <div class="input-group">
+                    <input type="file" class="input-field" id="playerImage" accept="image/*">
+                    <label for="playerImage">صورة اللاعب (اختيارية)</label>
+                </div>
+                <button class="btn btn-primary" onclick="addPlayer()">إضافة اللاعب</button>
+                <button class="btn btn-secondary" onclick="hideAddPlayerForm()">إلغاء</button>
+            </div>
+
+            <!-- Players Management -->
+            <div class="players-management">
+                <h3>إدارة اللاعبين</h3>
+                <div class="players-list" id="coachPlayersList">
+                    <!-- Players management will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Formation Management -->
+            <div class="formation-management">
+                <h3>إدارة التشكيلة</h3>
+                <div class="formation-selector">
+                    <select class="input-field" id="formationSelect" onchange="changeFormation()">
+                        <option value="2-1-2">2-1-2 (متوازنة)</option>
+                        <option value="1-3-1">1-3-1 (وسط قوي)</option>
+                        <option value="1-2-2">1-2-2 (هجومية)</option>
+                        <option value="2-2-1">2-2-1 (دفاعية)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Team Status Management -->
+            <div class="status-management">
+                <h3>إدارة حالة الفريق</h3>
+                <div class="status-selector">
+                    <select class="input-field" id="statusSelect" onchange="changeTeamStatus()">
+                        <option value="تدريب">تدريب</option>
+                        <option value="مباراة">مباراة</option>
+                        <option value="راحة">راحة</option>
+                        <option value="سفر">سفر</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
+

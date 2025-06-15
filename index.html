@@ -1,0 +1,2974 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7877c6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>FC Wolves - فريق الذئاب</title>
+    
+    <link rel="icon" type="image/png" href="images/fc_wolves_icon.png">
+    <link rel="apple-touch-icon" href="images/fc_wolves_icon.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Arabic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzBbcMUHBs_pc1mbfwobGW7KJgyDKmQIE",
+            authDomain: "mj36-7e65e.firebaseapp.com",
+            databaseURL: "https://mj36-7e65e-default-rtdb.firebaseio.com",
+            projectId: "mj36-7e65e",
+            storageBucket: "mj36-7e65e.firebasestorage.app",
+            messagingSenderId: "64103654826",
+            appId: "1:64103654826:web:c7dcd0e9af6466e67137d3"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+        
+        // Make Firebase available globally
+        window.firebase = {
+            app,
+            database,
+            storage,
+            ref,
+            set,
+            get,
+            onValue,
+            push,
+            update,
+            remove,
+            storageRef,
+            uploadBytes,
+            getDownloadURL,
+            deleteObject
+        };
+
+        // Initialize messaging if supported
+        if ('serviceWorker' in navigator && 'Notification' in window) {
+            try {
+                const messaging = getMessaging(app);
+                window.firebase.messaging = messaging;
+                window.firebase.getToken = getToken;
+                window.firebase.onMessage = onMessage;
+            } catch (error) {
+                console.log('Messaging not supported:', error);
+            }
+        }
+
+        // Notify when Firebase is ready
+        window.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #7877c6;
+            --secondary-color: #ff7730;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #2d2d2d;
+            --text-secondary: #666;
+            --success-color: #2ed573;
+            --error-color: #ff6b6b;
+            --warning-color: #ffa726;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 20px;
+            --font-arabic: 'Tajawal', 'Cairo', sans-serif;
+            --font-english: 'Roboto', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-arabic);
+            background: var(--background-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background-gradient);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header with Navigation */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            padding: 10px 0;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(120, 119, 198, 0.4);
+        }
+
+        .nav-icon.active {
+            background: var(--secondary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--error-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Login Section */
+        .login-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(120, 119, 198, 0.3);
+        }
+
+        .team-name {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-family: var(--font-english);
+        }
+
+        .team-subtitle {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .team-slogan {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            font-family: var(--font-arabic);
+            background: white;
+            transition: all 0.3s ease;
+            text-align: right;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(120, 119, 198, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-arabic);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(120, 119, 198, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+
+        /* Registration Section */
+        .registration-section {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .registration-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Player Dashboard */
+        .player-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Players Grid */
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .player-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .player-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .player-position {
+            font-size: 14px;
+            color: var(--text-secondary);
+            background: rgba(120, 119, 198, 0.1);
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        /* Formation Display */
+        .formation-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .formation-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .formation-info {
+            margin-top: 20px;
+        }
+
+        .formation-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .formation-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Match Info */
+        .match-info {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .countdown-item {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Coach Dashboard */
+        .coach-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .admin-tab {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: var(--font-arabic);
+            font-weight: 500;
+        }
+
+        .admin-tab.active {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: var(--font-arabic);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(120, 119, 198, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #e9ecef;
+            border-color: var(--primary-color);
+        }
+
+        /* Posts Section */
+        .posts-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .post-composer {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .post-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-family: var(--font-arabic);
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .post-content {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-actions-bar {
+            display: flex;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .post-action {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .post-action:hover {
+            background: rgba(120, 119, 198, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Chat Section */
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            height: calc(100vh - 140px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-bottom: 0;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-message.own {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .chat-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: #f1f3f4;
+            position: relative;
+        }
+
+        .chat-message.own .chat-bubble {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chat-sender {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        .chat-text {
+            line-height: 1.4;
+        }
+
+        .chat-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        .chat-input-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-family: var(--font-arabic);
+            font-size: 16px;
+        }
+
+        .chat-send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 15px;
+            }
+
+            .nav-icons {
+                gap: 10px;
+            }
+
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .section {
+                padding: 70px 15px 20px;
+            }
+
+            .login-card,
+            .registration-card {
+                padding: 30px 20px;
+            }
+
+            .team-name {
+                font-size: 28px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .players-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .countdown-timer {
+                gap: 10px;
+            }
+
+            .countdown-item {
+                padding: 10px;
+                min-width: 50px;
+            }
+
+            .countdown-number {
+                font-size: 20px;
+            }
+
+            .admin-tabs {
+                gap: 5px;
+            }
+
+            .admin-tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .chat-container {
+                height: calc(100vh - 120px);
+            }
+
+            .chat-bubble {
+                max-width: 85%;
+            }
+        }
+
+        /* Enhanced Animations and Effects */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in-up {
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(120, 119, 198, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(120, 119, 198, 0.6); }
+        }
+
+        .glow {
+            animation: glow 2s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Enhanced Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Enhanced Button Styles */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-arabic);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 5px 15px rgba(120, 119, 198, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(120, 119, 198, 0.4);
+        }
+
+        /* Enhanced Input Styles */
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            font-family: var(--font-arabic);
+            background: white;
+            transition: all 0.3s ease;
+            text-align: right;
+            position: relative;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(120, 119, 198, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Player Cards */
+        .player-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .player-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .player-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Enhanced Navigation Icons */
+        .nav-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(120, 119, 198, 0.3);
+        }
+
+        .nav-icon:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(120, 119, 198, 0.4);
+        }
+
+        .nav-icon.active {
+            background: var(--secondary-color);
+            box-shadow: 0 8px 25px rgba(255, 119, 48, 0.4);
+        }
+
+        /* Enhanced Loading Animation */
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .loader::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            border: 2px solid transparent;
+            border-top: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 0.5s linear infinite reverse;
+        }
+
+        /* Enhanced Match Info */
+        .match-info {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(120, 119, 198, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Enhanced Countdown */
+        .countdown-item {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(120, 119, 198, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .countdown-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(120, 119, 198, 0.4);
+        }
+
+        /* Enhanced Chat Styles */
+        .chat-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: #f1f3f4;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chat-bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .chat-message.own .chat-bubble {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        /* Enhanced Post Styles */
+        .post {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .mb-30 { margin-bottom: 30px; }
+        .mt-10 { margin-top: 10px; }
+        .mt-20 { margin-top: 20px; }
+        .hidden { display: none !important; }
+        .visible { display: block !important; }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">جاري تحميل فريق الذئاب...</div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="header hidden" id="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="images/fc_wolves_icon.png" alt="FC Wolves" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <span>FC WOLVES</span>
+            </div>
+            <div class="nav-icons">
+                <button class="nav-icon" id="homeBtn" onclick="showSection('playerDashboard')" title="الرئيسية">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="postsBtn" onclick="showSection('postsSection')" title="المنشورات">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="chatBtn" onclick="showSection('chatSection')" title="الدردشة">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                    <span class="notification-badge hidden" id="chatBadge">0</span>
+                </button>
+                <button class="nav-icon" id="profileBtn" onclick="showSection('profileSection')" title="الملف الشخصي">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+                <button class="nav-icon" id="logoutBtn" onclick="logout()" title="تسجيل الخروج">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Login Section -->
+        <section class="section login-section active" id="loginSection">
+            <div class="login-card">
+                <div class="team-logo">
+                    <img src="images/fc_wolves_logo.png" alt="FC Wolves" style="width: 120px; height: 120px; object-fit: contain;">
+                </div>
+                <h1 class="team-name">FC WOLVES</h1>
+                <h2 class="team-subtitle">فريق الذئاب</h2>
+                <p class="team-slogan">الكوشه وطن و الوطن لا يُخان 😂💪</p>
+                
+                <div class="input-group">
+                    <input type="text" class="input-field" id="accessCode" placeholder="أدخل رمز الدخول">
+                </div>
+                
+                <button class="btn btn-primary" onclick="checkAccessCode()">دخول</button>
+                <button class="btn btn-secondary" onclick="showRegistration()">إنشاء حساب جديد</button>
+                
+                <div class="error-message" id="loginError"></div>
+            </div>
+        </section>
+
+        <!-- Registration Section -->
+        <section class="section registration-section" id="registrationSection">
+            <div class="registration-card">
+                <div class="team-logo">
+                    <img src="images/fc_wolves_logo.png" alt="FC Wolves" style="width: 120px; height: 120px; object-fit: contain;">
+                </div>
+                <h1 class="team-name">إنشاء حساب جديد</h1>
+                <h2 class="team-subtitle">انضم إلى فريق الذئاب</h2>
+                
+                <div class="input-group">
+                    <input type="text" class="input-field" id="newPlayerName" placeholder="الاسم الكامل">
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" class="input-field" id="newPlayerPassword" placeholder="كلمة المرور">
+                </div>
+                
+                <div class="input-group">
+                    <select class="input-field" id="newPlayerPosition">
+                        <option value="">اختر المركز</option>
+                        <option value="حارس مرمى">حارس مرمى</option>
+                        <option value="مدافع">مدافع</option>
+                        <option value="لاعب وسط">لاعب وسط</option>
+                        <option value="مهاجم">مهاجم</option>
+                        <option value="احتياطي">احتياطي</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="registerPlayer()">إنشاء الحساب</button>
+                <button class="btn btn-secondary" onclick="showLogin()">العودة لتسجيل الدخول</button>
+                
+                <div class="error-message" id="registrationError"></div>
+            </div>
+        </section>
+
+        <!-- Player Dashboard -->
+        <section class="section" id="playerDashboard">
+            <div class="player-dashboard">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">مرحباً بك في فريق الذئاب</h1>
+                    <p class="dashboard-subtitle">تابع آخر أخبار الفريق والمباريات</p>
+                </div>
+
+                <!-- Team Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚽</div>
+                        <h3 class="card-title">حالة الفريق</h3>
+                    </div>
+                    <div id="teamStatus">
+                        <p>جاري تحميل حالة الفريق...</p>
+                    </div>
+                </div>
+
+                <!-- Next Match -->
+                <div class="match-info">
+                    <div class="card-header">
+                        <div class="card-icon">🏆</div>
+                        <h3 class="card-title">المباراة القادمة</h3>
+                    </div>
+                    <div id="nextMatchInfo">
+                        <p>لا توجد مباراة مجدولة حالياً</p>
+                    </div>
+                </div>
+
+                <!-- Current Formation -->
+                <div class="formation-container">
+                    <div class="card-header">
+                        <div class="card-icon">📋</div>
+                        <h3 class="card-title">التشكيلة الحالية</h3>
+                    </div>
+                    <div id="currentFormation">
+                        <img src="images/six_player_field.png" alt="تشكيلة الفريق" class="formation-image">
+                        <div class="formation-info">
+                            <div class="formation-name">تشكيلة 2-2-1</div>
+                            <div class="formation-description">التشكيلة الأساسية للفريق</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players List -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">👥</div>
+                        <h3 class="card-title">قائمة اللاعبين</h3>
+                    </div>
+                    <div class="players-grid" id="playersGrid">
+                        <!-- Players will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Previous Matches -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <h3 class="card-title">النتائج السابقة</h3>
+                    </div>
+                    <div id="previousMatches">
+                        <p>لا توجد نتائج سابقة</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Posts Section -->
+        <section class="section" id="postsSection">
+            <div class="posts-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">منشورات الفريق</h1>
+                    <p class="dashboard-subtitle">شارك أخبارك مع زملائك في الفريق</p>
+                </div>
+
+                <!-- Post Composer -->
+                <div class="post-composer">
+                    <textarea class="post-input" id="postContent" placeholder="ما الذي تريد مشاركته مع الفريق؟"></textarea>
+                    <div class="post-actions">
+                        <button class="btn btn-primary" onclick="createPost()">نشر</button>
+                        <span class="text-secondary">شارك أفكارك مع الفريق</span>
+                    </div>
+                </div>
+
+                <!-- Posts Feed -->
+                <div id="postsFeed">
+                    <!-- Posts will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section class="section" id="chatSection">
+            <div class="chat-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">دردشة الفريق</h1>
+                    <p class="dashboard-subtitle">تواصل مع زملائك في الفريق</p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Chat messages will be loaded here -->
+                </div>
+
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send-btn" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section class="section" id="profileSection">
+            <div class="player-dashboard">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">الملف الشخصي</h1>
+                    <p class="dashboard-subtitle">معلوماتك الشخصية في الفريق</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">👤</div>
+                        <h3 class="card-title">معلوماتي</h3>
+                    </div>
+                    <div id="playerProfile">
+                        <!-- Player profile will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Coach Dashboard -->
+        <section class="section" id="coachDashboard">
+            <div class="coach-dashboard">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">لوحة تحكم المدرب</h1>
+                    <p class="dashboard-subtitle">إدارة شاملة للفريق والمباريات</p>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="showAdminTab('playersManagement')">إدارة اللاعبين</button>
+                    <button class="admin-tab" onclick="showAdminTab('formationManagement')">إدارة التشكيلة</button>
+                    <button class="admin-tab" onclick="showAdminTab('matchManagement')">إدارة المباريات</button>
+                    <button class="admin-tab" onclick="showAdminTab('notificationsManagement')">الإشعارات</button>
+                    <button class="admin-tab" onclick="showAdminTab('postsManagement')">إدارة المنشورات</button>
+                    <button class="admin-tab" onclick="showAdminTab('registeredUsers')">المستخدمين المسجلين</button>
+                </div>
+
+                <!-- Players Management -->
+                <div class="admin-content active" id="playersManagement">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">➕</div>
+                            <h3 class="card-title">إضافة لاعب جديد</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">اسم اللاعب</label>
+                            <input type="text" class="form-control" id="playerName" placeholder="أدخل اسم اللاعب">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">المركز</label>
+                            <select class="form-control" id="playerPosition">
+                                <option value="">اختر المركز</option>
+                                <option value="حارس مرمى">حارس مرمى</option>
+                                <option value="مدافع">مدافع</option>
+                                <option value="لاعب وسط">لاعب وسط</option>
+                                <option value="مهاجم">مهاجم</option>
+                                <option value="احتياطي">احتياطي</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">رقم القميص</label>
+                            <input type="number" class="form-control" id="playerNumber" placeholder="رقم القميص" min="1" max="99">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">صورة اللاعب (اختيارية)</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" class="file-input" id="playerImage" accept="image/*">
+                                <label for="playerImage" class="file-input-label">
+                                    📷 اختر صورة من المعرض
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="addPlayer()">إضافة اللاعب</button>
+                    </div>
+
+                    <!-- Current Players -->
+                    <div class="card mt-20">
+                        <div class="card-header">
+                            <div class="card-icon">👥</div>
+                            <h3 class="card-title">اللاعبين الحاليين</h3>
+                        </div>
+                        <div class="players-grid" id="adminPlayersGrid">
+                            <!-- Players will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formation Management -->
+                <div class="admin-content" id="formationManagement">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📋</div>
+                            <h3 class="card-title">إدارة التشكيلة</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">نوع التشكيلة</label>
+                            <select class="form-control" id="formationType" onchange="changeFormation()">
+                                <option value="2-2-1">2-2-1 (دفاعية)</option>
+                                <option value="2-1-2">2-1-2 (متوازنة)</option>
+                                <option value="1-3-1">1-3-1 (وسط قوي)</option>
+                                <option value="1-2-2">1-2-2 (هجومية)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="formation-container">
+                            <img src="images/six_player_field.png" alt="تشكيلة الفريق" class="formation-image" id="formationPreview">
+                            <div class="formation-info">
+                                <div class="formation-name" id="formationName">تشكيلة 2-2-1</div>
+                                <div class="formation-description" id="formationDescription">التشكيلة الدفاعية الأساسية</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="saveFormation()">حفظ التشكيلة</button>
+                    </div>
+                </div>
+
+                <!-- Match Management -->
+                <div class="admin-content" id="matchManagement">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">⚽</div>
+                            <h3 class="card-title">إضافة مباراة جديدة</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">الفريق المنافس</label>
+                            <input type="text" class="form-control" id="opponentTeam" placeholder="اسم الفريق المنافس">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">تاريخ المباراة</label>
+                            <input type="datetime-local" class="form-control" id="matchDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">مكان المباراة</label>
+                            <input type="text" class="form-control" id="matchLocation" placeholder="مكان إقامة المباراة">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">نوع المباراة</label>
+                            <select class="form-control" id="matchType">
+                                <option value="ودية">مباراة ودية</option>
+                                <option value="دوري">مباراة دوري</option>
+                                <option value="كأس">مباراة كأس</option>
+                                <option value="تدريب">تدريب</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="addMatch()">إضافة المباراة</button>
+                    </div>
+
+                    <!-- Previous Matches -->
+                    <div class="card mt-20">
+                        <div class="card-header">
+                            <div class="card-icon">📊</div>
+                            <h3 class="card-title">المباريات السابقة</h3>
+                        </div>
+                        <div id="adminPreviousMatches">
+                            <!-- Previous matches will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Management -->
+                <div class="admin-content" id="notificationsManagement">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🔔</div>
+                            <h3 class="card-title">إرسال إشعار</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">عنوان الإشعار</label>
+                            <input type="text" class="form-control" id="notificationTitle" placeholder="عنوان الإشعار">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">محتوى الإشعار</label>
+                            <textarea class="form-control" id="notificationContent" placeholder="محتوى الإشعار" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">نوع الإشعار</label>
+                            <select class="form-control" id="notificationType">
+                                <option value="عام">إشعار عام</option>
+                                <option value="مباراة">تذكير بمباراة</option>
+                                <option value="تدريب">تذكير بتدريب</option>
+                                <option value="اجتماع">دعوة لاجتماع</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="sendNotification()">إرسال الإشعار</button>
+                    </div>
+                </div>
+
+                <!-- Posts Management -->
+                <div class="admin-content" id="postsManagement">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📝</div>
+                            <h3 class="card-title">إدارة المنشورات</h3>
+                        </div>
+                        <div id="adminPostsGrid">
+                            <!-- Posts will be loaded here for management -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registered Users -->
+                <div class="admin-content" id="registeredUsers">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">👥</div>
+                            <h3 class="card-title">المستخدمين المسجلين</h3>
+                        </div>
+                        <div id="registeredUsersGrid">
+                            <!-- Registered users will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentUser = null;
+        let currentSection = 'loginSection';
+        let isCoach = false;
+        let lastScrollY = 0;
+        let chatMessages = [];
+        let posts = [];
+        let players = [];
+        let matches = [];
+        let registeredUsers = [];
+
+        // Initialize default players data
+        const defaultPlayers = [
+            { id: 1, name: "جهاد سالم", position: "مهاجم", number: 9, nickname: "رأس حربه", image: null },
+            { id: 2, name: "محمد صالح", position: "لاعب وسط", number: 8, nickname: "خط وسط", image: null },
+            { id: 3, name: "محمد محمود", position: "لاعب وسط", number: 10, nickname: "جناح او خط وسط متمركز", image: null },
+            { id: 4, name: "عليوه", position: "لاعب وسط", number: 7, nickname: "صانع العاب", image: null },
+            { id: 5, name: "ميلاد خليفه", position: "مدافع", number: 4, nickname: "", image: null },
+            { id: 6, name: "عبدالسلام علي", position: "حارس مرمى", number: 1, nickname: "", image: null },
+            { id: 7, name: "عثمان صالح", position: "احتياطي", number: 2, nickname: "مدافع", image: null },
+            { id: 8, name: "محمد لامين", position: "احتياطي", number: 11, nickname: "جناح", image: null },
+            { id: 9, name: "اسامه حمد", position: "احتياطي", number: 99, nickname: "ليس معروف اين مركزه🤣", image: null }
+        ];
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Hide loading screen after 2 seconds
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 2000);
+
+            // Initialize Firebase data
+            window.addEventListener('firebaseReady', function() {
+                initializeDefaultData();
+                loadTeamData();
+            });
+
+            // Initialize scroll behavior
+            initializeScrollBehavior();
+
+            // Initialize PWA
+            initializePWA();
+        }
+
+        function initializeDefaultData() {
+            // Initialize default players if not exists
+            const playersRef = firebase.ref(firebase.database, 'fcwolves/players');
+            firebase.get(playersRef).then((snapshot) => {
+                if (!snapshot.exists()) {
+                    firebase.set(playersRef, defaultPlayers);
+                    players = defaultPlayers;
+                    updatePlayersDisplay();
+                }
+            }).catch((error) => {
+                console.log('Using local data:', error);
+                players = defaultPlayers;
+                updatePlayersDisplay();
+            });
+
+            // Initialize default team status
+            const statusRef = firebase.ref(firebase.database, 'fcwolves/teamStatus');
+            firebase.get(statusRef).then((snapshot) => {
+                if (!snapshot.exists()) {
+                    firebase.set(statusRef, {
+                        status: 'راحة',
+                        message: 'الفريق في حالة راحة',
+                        lastUpdated: new Date().toISOString()
+                    });
+                }
+            }).catch((error) => {
+                console.log('Error initializing team status:', error);
+            });
+        }
+
+        function initializeScrollBehavior() {
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('header');
+                const currentScrollY = window.scrollY;
+
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    // Scrolling down
+                    header.classList.add('hidden');
+                } else {
+                    // Scrolling up
+                    header.classList.remove('hidden');
+                }
+
+                lastScrollY = currentScrollY;
+            });
+        }
+
+        function initializePWA() {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            }
+        }
+
+        // Authentication Functions
+        function checkAccessCode() {
+            const code = document.getElementById('accessCode').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            if (!code) {
+                showError(errorDiv, 'يرجى إدخال رمز الدخول');
+                return;
+            }
+
+            if (code === 'nmoi557') {
+                // Player access
+                isCoach = false;
+                showSection('playerDashboard');
+                showHeader();
+                loadPlayerData();
+            } else if (code === '0011JMFC') {
+                // Coach access
+                isCoach = true;
+                showSection('coachDashboard');
+                showHeader();
+                loadCoachData();
+            } else {
+                showError(errorDiv, 'رمز الدخول غير صحيح');
+            }
+        }
+
+        function showRegistration() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('registrationSection').classList.add('active');
+            document.getElementById('registrationSection').style.display = 'flex';
+        }
+
+        function showLogin() {
+            document.getElementById('registrationSection').classList.remove('active');
+            document.getElementById('registrationSection').style.display = 'none';
+            document.getElementById('loginSection').classList.add('active');
+        }
+
+        function registerPlayer() {
+            const name = document.getElementById('newPlayerName').value.trim();
+            const password = document.getElementById('newPlayerPassword').value.trim();
+            const position = document.getElementById('newPlayerPosition').value;
+            const errorDiv = document.getElementById('registrationError');
+
+            if (!name || !password || !position) {
+                showError(errorDiv, 'يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                password: password,
+                position: position,
+                registeredAt: new Date().toISOString(),
+                isApproved: false
+            };
+
+            // Save to Firebase
+            const usersRef = firebase.ref(firebase.database, 'fcwolves/registeredUsers');
+            firebase.get(usersRef).then((snapshot) => {
+                const users = snapshot.val() || [];
+                users.push(newUser);
+                return firebase.set(usersRef, users);
+            }).then(() => {
+                alert('تم إنشاء الحساب بنجاح! سيتم مراجعة طلبك من قبل المدرب.');
+                showLogin();
+                clearRegistrationForm();
+            }).catch((error) => {
+                console.log('Error registering user:', error);
+                registeredUsers.push(newUser);
+                alert('تم إنشاء الحساب بنجاح! سيتم مراجعة طلبك من قبل المدرب.');
+                showLogin();
+                clearRegistrationForm();
+            });
+        }
+
+        function clearRegistrationForm() {
+            document.getElementById('newPlayerName').value = '';
+            document.getElementById('newPlayerPassword').value = '';
+            document.getElementById('newPlayerPosition').value = '';
+        }
+
+        function logout() {
+            currentUser = null;
+            isCoach = false;
+            hideHeader();
+            showSection('loginSection');
+            document.getElementById('accessCode').value = '';
+        }
+
+        // UI Functions
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                currentSection = sectionId;
+                
+                // Update navigation
+                updateNavigation(sectionId);
+                
+                // Load section-specific data
+                loadSectionData(sectionId);
+            }
+        }
+
+        function updateNavigation(sectionId) {
+            const navIcons = document.querySelectorAll('.nav-icon');
+            navIcons.forEach(icon => icon.classList.remove('active'));
+
+            switch(sectionId) {
+                case 'playerDashboard':
+                case 'coachDashboard':
+                    document.getElementById('homeBtn').classList.add('active');
+                    break;
+                case 'postsSection':
+                    document.getElementById('postsBtn').classList.add('active');
+                    break;
+                case 'chatSection':
+                    document.getElementById('chatBtn').classList.add('active');
+                    break;
+                case 'profileSection':
+                    document.getElementById('profileBtn').classList.add('active');
+                    break;
+            }
+        }
+
+        function showHeader() {
+            document.getElementById('header').classList.remove('hidden');
+        }
+
+        function hideHeader() {
+            document.getElementById('header').classList.add('hidden');
+        }
+
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Data Loading Functions
+        function loadSectionData(sectionId) {
+            switch(sectionId) {
+                case 'playerDashboard':
+                    loadPlayerDashboard();
+                    break;
+                case 'coachDashboard':
+                    loadCoachDashboard();
+                    break;
+                case 'postsSection':
+                    loadPosts();
+                    break;
+                case 'chatSection':
+                    loadChat();
+                    break;
+                case 'profileSection':
+                    loadProfile();
+                    break;
+            }
+        }
+
+        function loadPlayerData() {
+            loadTeamData();
+            loadPosts();
+            loadChat();
+        }
+
+        function loadCoachData() {
+            loadTeamData();
+            loadRegisteredUsers();
+            loadPosts();
+        }
+
+        function loadTeamData() {
+            loadPlayers();
+            loadTeamStatus();
+            loadNextMatch();
+            loadPreviousMatches();
+        }
+
+        function loadPlayers() {
+            const playersRef = firebase.ref(firebase.database, 'fcwolves/players');
+            firebase.get(playersRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    players = snapshot.val();
+                } else {
+                    players = defaultPlayers;
+                }
+                updatePlayersDisplay();
+            }).catch((error) => {
+                console.log('Error loading players:', error);
+                players = defaultPlayers;
+                updatePlayersDisplay();
+            });
+        }
+
+        function updatePlayersDisplay() {
+            const playersGrid = document.getElementById('playersGrid');
+            const adminPlayersGrid = document.getElementById('adminPlayersGrid');
+            
+            if (playersGrid) {
+                playersGrid.innerHTML = players.map(player => createPlayerCard(player)).join('');
+            }
+            
+            if (adminPlayersGrid) {
+                adminPlayersGrid.innerHTML = players.map(player => createAdminPlayerCard(player)).join('');
+            }
+        }
+
+        function createPlayerCard(player) {
+            const avatarContent = player.image ? 
+                `<img src="${player.image}" alt="${player.name}">` : 
+                player.name.charAt(0);
+                
+            return `
+                <div class="player-card">
+                    <div class="player-avatar">${avatarContent}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-position">${player.position}</div>
+                    ${player.nickname ? `<div class="text-secondary" style="font-size: 12px; margin-top: 5px;">${player.nickname}</div>` : ''}
+                    <div class="text-secondary" style="font-size: 12px; margin-top: 5px;">رقم ${player.number}</div>
+                </div>
+            `;
+        }
+
+        function createAdminPlayerCard(player) {
+            const avatarContent = player.image ? 
+                `<img src="${player.image}" alt="${player.name}">` : 
+                player.name.charAt(0);
+                
+            return `
+                <div class="player-card">
+                    <div class="player-avatar">${avatarContent}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-position">${player.position}</div>
+                    ${player.nickname ? `<div class="text-secondary" style="font-size: 12px; margin-top: 5px;">${player.nickname}</div>` : ''}
+                    <div class="text-secondary" style="font-size: 12px; margin-top: 5px;">رقم ${player.number}</div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;" onclick="editPlayer(${player.id})">تعديل</button>
+                        <button class="btn" style="background: var(--error-color); color: white; padding: 5px 10px; font-size: 12px;" onclick="deletePlayer(${player.id})">حذف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadTeamStatus() {
+            const statusRef = firebase.ref(firebase.database, 'fcwolves/teamStatus');
+            firebase.get(statusRef).then((snapshot) => {
+                const statusElement = document.getElementById('teamStatus');
+                if (snapshot.exists()) {
+                    const status = snapshot.val();
+                    statusElement.innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">${getStatusIcon(status.status)}</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">${status.status}</div>
+                            <div style="color: var(--text-secondary);">${status.message}</div>
+                        </div>
+                    `;
+                } else {
+                    statusElement.innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">😴</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">راحة</div>
+                            <div style="color: var(--text-secondary);">الفريق في حالة راحة</div>
+                        </div>
+                    `;
+                }
+            }).catch((error) => {
+                console.log('Error loading team status:', error);
+                const statusElement = document.getElementById('teamStatus');
+                statusElement.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">😴</div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">راحة</div>
+                        <div style="color: var(--text-secondary);">الفريق في حالة راحة</div>
+                    </div>
+                `;
+            });
+        }
+
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'تدريب': return '🏃‍♂️';
+                case 'مباراة': return '⚽';
+                case 'سفر': return '✈️';
+                case 'راحة': return '😴';
+                default: return '⚽';
+            }
+        }
+
+        function loadNextMatch() {
+            const matchesRef = firebase.ref(firebase.database, 'fcwolves/matches');
+            firebase.get(matchesRef).then((snapshot) => {
+                const matchInfoElement = document.getElementById('nextMatchInfo');
+                if (snapshot.exists()) {
+                    const matches = snapshot.val();
+                    const upcomingMatches = matches.filter(match => new Date(match.date) > new Date());
+                    
+                    if (upcomingMatches.length > 0) {
+                        const nextMatch = upcomingMatches.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+                        matchInfoElement.innerHTML = createMatchDisplay(nextMatch);
+                        startCountdown(nextMatch.date);
+                    } else {
+                        matchInfoElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مباراة مجدولة حالياً</p>';
+                    }
+                } else {
+                    matchInfoElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مباراة مجدولة حالياً</p>';
+                }
+            }).catch((error) => {
+                console.log('Error loading next match:', error);
+                document.getElementById('nextMatchInfo').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مباراة مجدولة حالياً</p>';
+            });
+        }
+
+        function createMatchDisplay(match) {
+            const matchDate = new Date(match.date);
+            const formattedDate = matchDate.toLocaleDateString('ar-SA');
+            const formattedTime = matchDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            
+            return `
+                <div style="text-align: center;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 15px;">مباراة ${match.type}</h3>
+                    <div style="font-size: 20px; font-weight: 600; margin-bottom: 10px;">
+                        FC Wolves 🆚 ${match.opponent}
+                    </div>
+                    <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                        📅 ${formattedDate} - ⏰ ${formattedTime}
+                    </div>
+                    <div style="color: var(--text-secondary); margin-bottom: 20px;">
+                        📍 ${match.location}
+                    </div>
+                    <div id="countdown" class="countdown-timer"></div>
+                </div>
+            `;
+        }
+
+        function startCountdown(matchDate) {
+            const countdownElement = document.getElementById('countdown');
+            if (!countdownElement) return;
+
+            const updateCountdown = () => {
+                const now = new Date().getTime();
+                const matchTime = new Date(matchDate).getTime();
+                const distance = matchTime - now;
+
+                if (distance < 0) {
+                    countdownElement.innerHTML = '<div style="color: var(--success-color); font-weight: 600;">المباراة بدأت!</div>';
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.innerHTML = `
+                    <div class="countdown-item">
+                        <span class="countdown-number">${days}</span>
+                        <span class="countdown-label">يوم</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number">${hours}</span>
+                        <span class="countdown-label">ساعة</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number">${minutes}</span>
+                        <span class="countdown-label">دقيقة</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number">${seconds}</span>
+                        <span class="countdown-label">ثانية</span>
+                    </div>
+                `;
+            };
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        function loadPreviousMatches() {
+            const matchesRef = firebase.ref(firebase.database, 'fcwolves/matches');
+            firebase.get(matchesRef).then((snapshot) => {
+                const previousMatchesElement = document.getElementById('previousMatches');
+                const adminPreviousMatchesElement = document.getElementById('adminPreviousMatches');
+                
+                if (snapshot.exists()) {
+                    const matches = snapshot.val();
+                    const pastMatches = matches.filter(match => 
+                        new Date(match.date) < new Date() && match.result
+                    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    if (pastMatches.length > 0) {
+                        const matchesHTML = pastMatches.map(match => createPreviousMatchCard(match)).join('');
+                        if (previousMatchesElement) {
+                            previousMatchesElement.innerHTML = matchesHTML;
+                        }
+                        if (adminPreviousMatchesElement) {
+                            adminPreviousMatchesElement.innerHTML = matchesHTML;
+                        }
+                    } else {
+                        const noMatchesHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد نتائج سابقة</p>';
+                        if (previousMatchesElement) {
+                            previousMatchesElement.innerHTML = noMatchesHTML;
+                        }
+                        if (adminPreviousMatchesElement) {
+                            adminPreviousMatchesElement.innerHTML = noMatchesHTML;
+                        }
+                    }
+                } else {
+                    const noMatchesHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد نتائج سابقة</p>';
+                    if (previousMatchesElement) {
+                        previousMatchesElement.innerHTML = noMatchesHTML;
+                    }
+                    if (adminPreviousMatchesElement) {
+                        adminPreviousMatchesElement.innerHTML = noMatchesHTML;
+                    }
+                }
+            }).catch((error) => {
+                console.log('Error loading previous matches:', error);
+                const noMatchesHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد نتائج سابقة</p>';
+                const previousMatchesElement = document.getElementById('previousMatches');
+                const adminPreviousMatchesElement = document.getElementById('adminPreviousMatches');
+                if (previousMatchesElement) {
+                    previousMatchesElement.innerHTML = noMatchesHTML;
+                }
+                if (adminPreviousMatchesElement) {
+                    adminPreviousMatchesElement.innerHTML = noMatchesHTML;
+                }
+            });
+        }
+
+        function createPreviousMatchCard(match) {
+            const matchDate = new Date(match.date);
+            const formattedDate = matchDate.toLocaleDateString('ar-SA');
+            const resultClass = match.result.includes('فوز') ? 'success-color' : 
+                               match.result.includes('خسارة') ? 'error-color' : 'warning-color';
+            
+            return `
+                <div class="card mb-10">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="font-weight: 600;">FC Wolves 🆚 ${match.opponent}</div>
+                        <div style="color: var(--${resultClass}); font-weight: 600;">${match.result}</div>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        📅 ${formattedDate} - 📍 ${match.location}
+                    </div>
+                    ${match.notes ? `<div style="margin-top: 10px; font-size: 14px; color: var(--text-secondary);">${match.notes}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Player Management Functions
+        function addPlayer() {
+            const name = document.getElementById('playerName').value.trim();
+            const position = document.getElementById('playerPosition').value;
+            const number = document.getElementById('playerNumber').value;
+            const imageFile = document.getElementById('playerImage').files[0];
+
+            if (!name || !position || !number) {
+                alert('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+
+            // Check if number is already taken
+            if (players.some(player => player.number == number)) {
+                alert('رقم القميص مستخدم بالفعل');
+                return;
+            }
+
+            const newPlayer = {
+                id: Date.now(),
+                name: name,
+                position: position,
+                number: parseInt(number),
+                nickname: '',
+                image: null
+            };
+
+            if (imageFile) {
+                // Upload image to Firebase Storage
+                const imageRef = firebase.storageRef(firebase.storage, `players/${newPlayer.id}`);
+                firebase.uploadBytes(imageRef, imageFile).then((snapshot) => {
+                    return firebase.getDownloadURL(snapshot.ref);
+                }).then((downloadURL) => {
+                    newPlayer.image = downloadURL;
+                    savePlayer(newPlayer);
+                }).catch((error) => {
+                    console.log('Error uploading image:', error);
+                    savePlayer(newPlayer);
+                });
+            } else {
+                savePlayer(newPlayer);
+            }
+        }
+
+        function savePlayer(player) {
+            players.push(player);
+            
+            // Save to Firebase
+            const playersRef = firebase.ref(firebase.database, 'fcwolves/players');
+            firebase.set(playersRef, players).then(() => {
+                updatePlayersDisplay();
+                clearPlayerForm();
+                alert('تم إضافة اللاعب بنجاح');
+            }).catch((error) => {
+                console.log('Error saving player:', error);
+                updatePlayersDisplay();
+                clearPlayerForm();
+                alert('تم إضافة اللاعب بنجاح');
+            });
+        }
+
+        function clearPlayerForm() {
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerPosition').value = '';
+            document.getElementById('playerNumber').value = '';
+            document.getElementById('playerImage').value = '';
+        }
+
+        function editPlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            const newName = prompt('اسم اللاعب:', player.name);
+            if (newName && newName.trim() !== player.name) {
+                player.name = newName.trim();
+                savePlayersData();
+            }
+        }
+
+        function deletePlayer(playerId) {
+            if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
+                const playerIndex = players.findIndex(p => p.id === playerId);
+                if (playerIndex > -1) {
+                    const player = players[playerIndex];
+                    
+                    // Delete image from storage if exists
+                    if (player.image) {
+                        const imageRef = firebase.storageRef(firebase.storage, `players/${playerId}`);
+                        firebase.deleteObject(imageRef).catch((error) => {
+                            console.log('Error deleting image:', error);
+                        });
+                    }
+                    
+                    players.splice(playerIndex, 1);
+                    savePlayersData();
+                }
+            }
+        }
+
+        function savePlayersData() {
+            const playersRef = firebase.ref(firebase.database, 'fcwolves/players');
+            firebase.set(playersRef, players).then(() => {
+                updatePlayersDisplay();
+                alert('تم تحديث بيانات اللاعبين');
+            }).catch((error) => {
+                console.log('Error saving players:', error);
+                updatePlayersDisplay();
+                alert('تم تحديث بيانات اللاعبين');
+            });
+        }
+
+        // Formation Management
+        function changeFormation() {
+            const formationType = document.getElementById('formationType').value;
+            const formationPreview = document.getElementById('formationPreview');
+            const formationName = document.getElementById('formationName');
+            const formationDescription = document.getElementById('formationDescription');
+
+            const formations = {
+                '2-2-1': {
+                    image: 'images/six_player_field.png',
+                    name: 'تشكيلة 2-2-1',
+                    description: 'تشكيلة دفاعية قوية مع مدافعين ولاعبي وسط'
+                },
+                '2-1-2': {
+                    image: 'images/formation_2_1_2.png',
+                    name: 'تشكيلة 2-1-2',
+                    description: 'تشكيلة متوازنة بين الدفاع والهجوم'
+                },
+                '1-3-1': {
+                    image: 'images/formation_1_3_1.png',
+                    name: 'تشكيلة 1-3-1',
+                    description: 'تشكيلة قوية في الوسط مع ثلاثة لاعبي وسط'
+                },
+                '1-2-2': {
+                    image: 'images/formation_1_2_2.png',
+                    name: 'تشكيلة 1-2-2',
+                    description: 'تشكيلة هجومية مع مهاجمين'
+                }
+            };
+
+            const formation = formations[formationType];
+            if (formation) {
+                formationPreview.src = formation.image;
+                formationName.textContent = formation.name;
+                formationDescription.textContent = formation.description;
+            }
+        }
+
+        function saveFormation() {
+            const formationType = document.getElementById('formationType').value;
+            
+            const formationData = {
+                type: formationType,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const formationRef = firebase.ref(firebase.database, 'fcwolves/formation');
+            firebase.set(formationRef, formationData).then(() => {
+                alert('تم حفظ التشكيلة بنجاح');
+            }).catch((error) => {
+                console.log('Error saving formation:', error);
+                alert('تم حفظ التشكيلة بنجاح');
+            });
+        }
+
+        // Match Management
+        function addMatch() {
+            const opponent = document.getElementById('opponentTeam').value.trim();
+            const date = document.getElementById('matchDate').value;
+            const location = document.getElementById('matchLocation').value.trim();
+            const type = document.getElementById('matchType').value;
+
+            if (!opponent || !date || !location || !type) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const newMatch = {
+                id: Date.now(),
+                opponent: opponent,
+                date: date,
+                location: location,
+                type: type,
+                result: null,
+                notes: ''
+            };
+
+            // Save to Firebase
+            const matchesRef = firebase.ref(firebase.database, 'fcwolves/matches');
+            firebase.get(matchesRef).then((snapshot) => {
+                const matches = snapshot.val() || [];
+                matches.push(newMatch);
+                return firebase.set(matchesRef, matches);
+            }).then(() => {
+                alert('تم إضافة المباراة بنجاح');
+                clearMatchForm();
+                loadNextMatch();
+                loadPreviousMatches();
+            }).catch((error) => {
+                console.log('Error adding match:', error);
+                alert('تم إضافة المباراة بنجاح');
+                clearMatchForm();
+                loadNextMatch();
+                loadPreviousMatches();
+            });
+        }
+
+        function clearMatchForm() {
+            document.getElementById('opponentTeam').value = '';
+            document.getElementById('matchDate').value = '';
+            document.getElementById('matchLocation').value = '';
+            document.getElementById('matchType').value = '';
+        }
+
+        // Notifications
+        function sendNotification() {
+            const title = document.getElementById('notificationTitle').value.trim();
+            const content = document.getElementById('notificationContent').value.trim();
+            const type = document.getElementById('notificationType').value;
+
+            if (!title || !content) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const notification = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+
+            // Save to Firebase
+            const notificationsRef = firebase.ref(firebase.database, 'fcwolves/notifications');
+            firebase.get(notificationsRef).then((snapshot) => {
+                const notifications = snapshot.val() || [];
+                notifications.push(notification);
+                return firebase.set(notificationsRef, notifications);
+            }).then(() => {
+                alert('تم إرسال الإشعار بنجاح');
+                clearNotificationForm();
+                
+                // Send push notification if supported
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(title, {
+                        body: content,
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🐺</text></svg>'
+                    });
+                }
+            }).catch((error) => {
+                console.log('Error sending notification:', error);
+                alert('تم إرسال الإشعار بنجاح');
+                clearNotificationForm();
+            });
+        }
+
+        function clearNotificationForm() {
+            document.getElementById('notificationTitle').value = '';
+            document.getElementById('notificationContent').value = '';
+            document.getElementById('notificationType').value = 'عام';
+        }
+
+        // Posts Management
+        function loadPosts() {
+            const postsRef = firebase.ref(firebase.database, 'fcwolves/posts');
+            firebase.get(postsRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    posts = snapshot.val().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                } else {
+                    posts = [];
+                }
+                updatePostsDisplay();
+            }).catch((error) => {
+                console.log('Error loading posts:', error);
+                posts = [];
+                updatePostsDisplay();
+            });
+        }
+
+        function updatePostsDisplay() {
+            const postsFeed = document.getElementById('postsFeed');
+            const adminPostsGrid = document.getElementById('adminPostsGrid');
+            
+            if (postsFeed) {
+                if (posts.length > 0) {
+                    postsFeed.innerHTML = posts.map(post => createPostCard(post)).join('');
+                } else {
+                    postsFeed.innerHTML = '<div class="card text-center"><p>لا توجد منشورات حتى الآن</p></div>';
+                }
+            }
+            
+            if (adminPostsGrid) {
+                if (posts.length > 0) {
+                    adminPostsGrid.innerHTML = posts.map(post => createAdminPostCard(post)).join('');
+                } else {
+                    adminPostsGrid.innerHTML = '<div class="card text-center"><p>لا توجد منشورات للإدارة</p></div>';
+                }
+            }
+        }
+
+        function createPostCard(post) {
+            const postDate = new Date(post.timestamp);
+            const timeAgo = getTimeAgo(postDate);
+            
+            return `
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-avatar">${post.author.charAt(0)}</div>
+                        <div class="post-info">
+                            <div class="post-author">${post.author}</div>
+                            <div class="post-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div class="post-actions-bar">
+                        <button class="post-action">
+                            👍 إعجاب
+                        </button>
+                        <button class="post-action">
+                            💬 تعليق
+                        </button>
+                        <button class="post-action">
+                            📤 مشاركة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createAdminPostCard(post) {
+            const postDate = new Date(post.timestamp);
+            const timeAgo = getTimeAgo(postDate);
+            
+            return `
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-avatar">${post.author.charAt(0)}</div>
+                        <div class="post-info">
+                            <div class="post-author">${post.author}</div>
+                            <div class="post-time">${timeAgo}</div>
+                        </div>
+                        <button class="btn" style="background: var(--error-color); color: white; padding: 5px 10px; font-size: 12px;" onclick="deletePost(${post.id})">حذف</button>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                </div>
+            `;
+        }
+
+        function createPost() {
+            const content = document.getElementById('postContent').value.trim();
+            
+            if (!content) {
+                alert('يرجى كتابة محتوى المنشور');
+                return;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                author: currentUser || 'لاعب',
+                content: content,
+                timestamp: new Date().toISOString(),
+                likes: 0,
+                comments: []
+            };
+
+            // Save to Firebase
+            const postsRef = firebase.ref(firebase.database, 'fcwolves/posts');
+            firebase.get(postsRef).then((snapshot) => {
+                const posts = snapshot.val() || [];
+                posts.push(newPost);
+                return firebase.set(postsRef, posts);
+            }).then(() => {
+                document.getElementById('postContent').value = '';
+                loadPosts();
+            }).catch((error) => {
+                console.log('Error creating post:', error);
+                posts.push(newPost);
+                document.getElementById('postContent').value = '';
+                updatePostsDisplay();
+            });
+        }
+
+        function deletePost(postId) {
+            if (confirm('هل أنت متأكد من حذف هذا المنشور؟')) {
+                const postIndex = posts.findIndex(p => p.id === postId);
+                if (postIndex > -1) {
+                    posts.splice(postIndex, 1);
+                    
+                    // Save to Firebase
+                    const postsRef = firebase.ref(firebase.database, 'fcwolves/posts');
+                    firebase.set(postsRef, posts).then(() => {
+                        updatePostsDisplay();
+                    }).catch((error) => {
+                        console.log('Error deleting post:', error);
+                        updatePostsDisplay();
+                    });
+                }
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'الآن';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} دقيقة`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ساعة`;
+            return `${Math.floor(diffInSeconds / 86400)} يوم`;
+        }
+
+        // Chat Functions
+        function loadChat() {
+            const chatRef = firebase.ref(firebase.database, 'fcwolves/chat');
+            firebase.get(chatRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    chatMessages = snapshot.val();
+                } else {
+                    chatMessages = [];
+                }
+                updateChatDisplay();
+            }).catch((error) => {
+                console.log('Error loading chat:', error);
+                chatMessages = [];
+                updateChatDisplay();
+            });
+        }
+
+        function updateChatDisplay() {
+            const chatMessagesContainer = document.getElementById('chatMessages');
+            if (!chatMessagesContainer) return;
+            
+            if (chatMessages.length > 0) {
+                chatMessagesContainer.innerHTML = chatMessages.map(message => createChatMessage(message)).join('');
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            } else {
+                chatMessagesContainer.innerHTML = '<div class="text-center" style="padding: 20px; color: var(--text-secondary);">لا توجد رسائل حتى الآن</div>';
+            }
+        }
+
+        function createChatMessage(message) {
+            const isOwn = message.sender === (currentUser || 'أنت');
+            const messageDate = new Date(message.timestamp);
+            const timeString = messageDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            
+            return `
+                <div class="chat-message ${isOwn ? 'own' : ''}">
+                    <div class="chat-avatar">${message.sender.charAt(0)}</div>
+                    <div class="chat-bubble">
+                        ${!isOwn ? `<div class="chat-sender">${message.sender}</div>` : ''}
+                        <div class="chat-text">${message.text}</div>
+                        <div class="chat-time">${timeString}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const messageText = chatInput.value.trim();
+            
+            if (!messageText) return;
+
+            const newMessage = {
+                id: Date.now(),
+                sender: currentUser || 'لاعب',
+                text: messageText,
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to Firebase
+            const chatRef = firebase.ref(firebase.database, 'fcwolves/chat');
+            firebase.get(chatRef).then((snapshot) => {
+                const messages = snapshot.val() || [];
+                messages.push(newMessage);
+                return firebase.set(chatRef, messages);
+            }).then(() => {
+                chatInput.value = '';
+                loadChat();
+            }).catch((error) => {
+                console.log('Error sending message:', error);
+                chatMessages.push(newMessage);
+                chatInput.value = '';
+                updateChatDisplay();
+            });
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Admin Functions
+        function showAdminTab(tabId) {
+            // Hide all admin content
+            const adminContents = document.querySelectorAll('.admin-content');
+            adminContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            const adminTabs = document.querySelectorAll('.admin-tab');
+            adminTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show target content
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+
+            // Load tab-specific data
+            if (tabId === 'registeredUsers') {
+                loadRegisteredUsers();
+            }
+        }
+
+        function loadRegisteredUsers() {
+            const usersRef = firebase.ref(firebase.database, 'fcwolves/registeredUsers');
+            firebase.get(usersRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    registeredUsers = snapshot.val();
+                } else {
+                    registeredUsers = [];
+                }
+                updateRegisteredUsersDisplay();
+            }).catch((error) => {
+                console.log('Error loading registered users:', error);
+                registeredUsers = [];
+                updateRegisteredUsersDisplay();
+            });
+        }
+
+        function updateRegisteredUsersDisplay() {
+            const registeredUsersGrid = document.getElementById('registeredUsersGrid');
+            if (!registeredUsersGrid) return;
+            
+            if (registeredUsers.length > 0) {
+                registeredUsersGrid.innerHTML = registeredUsers.map(user => createUserCard(user)).join('');
+            } else {
+                registeredUsersGrid.innerHTML = '<div class="card text-center"><p>لا توجد طلبات تسجيل جديدة</p></div>';
+            }
+        }
+
+        function createUserCard(user) {
+            const registrationDate = new Date(user.registeredAt).toLocaleDateString('ar-SA');
+            const statusClass = user.isApproved ? 'success-color' : 'warning-color';
+            const statusText = user.isApproved ? 'مقبول' : 'في انتظار الموافقة';
+            
+            return `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">${user.name}</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">${user.position}</div>
+                            <div style="color: var(--text-secondary); font-size: 12px;">تاريخ التسجيل: ${registrationDate}</div>
+                        </div>
+                        <div style="color: var(--${statusClass}); font-weight: 600; font-size: 14px;">${statusText}</div>
+                    </div>
+                    ${!user.isApproved ? `
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" style="flex: 1; padding: 8px;" onclick="approveUser(${user.id})">قبول</button>
+                            <button class="btn" style="background: var(--error-color); color: white; flex: 1; padding: 8px;" onclick="rejectUser(${user.id})">رفض</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function approveUser(userId) {
+            const userIndex = registeredUsers.findIndex(u => u.id === userId);
+            if (userIndex > -1) {
+                registeredUsers[userIndex].isApproved = true;
+                
+                // Save to Firebase
+                const usersRef = firebase.ref(firebase.database, 'fcwolves/registeredUsers');
+                firebase.set(usersRef, registeredUsers).then(() => {
+                    updateRegisteredUsersDisplay();
+                    alert('تم قبول المستخدم بنجاح');
+                }).catch((error) => {
+                    console.log('Error approving user:', error);
+                    updateRegisteredUsersDisplay();
+                    alert('تم قبول المستخدم بنجاح');
+                });
+            }
+        }
+
+        function rejectUser(userId) {
+            if (confirm('هل أنت متأكد من رفض هذا المستخدم؟')) {
+                const userIndex = registeredUsers.findIndex(u => u.id === userId);
+                if (userIndex > -1) {
+                    registeredUsers.splice(userIndex, 1);
+                    
+                    // Save to Firebase
+                    const usersRef = firebase.ref(firebase.database, 'fcwolves/registeredUsers');
+                    firebase.set(usersRef, registeredUsers).then(() => {
+                        updateRegisteredUsersDisplay();
+                        alert('تم رفض المستخدم');
+                    }).catch((error) => {
+                        console.log('Error rejecting user:', error);
+                        updateRegisteredUsersDisplay();
+                        alert('تم رفض المستخدم');
+                    });
+                }
+            }
+        }
+
+        // Dashboard Loading Functions
+        function loadPlayerDashboard() {
+            loadTeamData();
+        }
+
+        function loadCoachDashboard() {
+            loadTeamData();
+            loadRegisteredUsers();
+        }
+
+        function loadProfile() {
+            const profileElement = document.getElementById('playerProfile');
+            if (profileElement) {
+                profileElement.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px;">${(currentUser || 'لاعب').charAt(0)}</div>
+                        <h3 style="margin-bottom: 10px;">${currentUser || 'لاعب'}</h3>
+                        <p style="color: var(--text-secondary);">عضو في فريق الذئاب</p>
+                        <div style="margin-top: 20px; padding: 20px; background: rgba(120, 119, 198, 0.1); border-radius: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>الدور:</strong> ${isCoach ? 'مدرب' : 'لاعب'}</p>
+                            <p style="margin-bottom: 10px;"><strong>تاريخ الانضمام:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
+                            <p><strong>الحالة:</strong> نشط</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Request notification permission
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted');
+                    }
+                });
+            }
+        }
+
+        // Initialize notification permission request
+        setTimeout(requestNotificationPermission, 3000);
+    </script>
+</body>
+</html>
+

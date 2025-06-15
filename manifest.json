@@ -1,0 +1,26 @@
+{
+    "name": "FC Wolves - فريق الذئاب",
+    "short_name": "FC Wolves",
+    "description": "تطبيق إدارة فريق FC Wolves السداسي",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#7877c6",
+    "theme_color": "#7877c6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "images/fc_wolves_icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "images/fc_wolves_icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["sports", "productivity"],
+    "lang": "ar",
+    "dir": "rtl"
+}
+
